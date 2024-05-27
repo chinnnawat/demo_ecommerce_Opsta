@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: djangoEcommerce
+    ports:
+      - "8000:8000"
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./backend/mysite:/app
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ecommerce
+    container_name: pgEcommerce
+    ports:
+      - "5433:5432"
+    networks:
+      - ecommerce-network
+    volumes:
+      - postgres-s-data:/var/lib/postgres/data
+
+networks:
+  ecommerce-network:
+    driver: bridge
+
+volumes:
+  postgres-s-data:
