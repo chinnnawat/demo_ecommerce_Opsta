@@ -2,7 +2,7 @@ version: '3.8'
 services:
   backend:
     build:
-      context: .
+      context: ./backend/
       dockerfile: Dockerfile
     container_name: djangoEcommerce
     ports:
@@ -11,6 +11,8 @@ services:
       - ecommerce-network
     volumes:
       - ./backend/mysite:/app
+    depends_on:
+      - postgres
   postgres:
     image: postgres:latest
     environment:

@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 
 # Copy the current directory contents into the container at /app
-COPY backend/ /app
+COPY ./ /app
 
 
 # Install dependencies specified in requirements.txt
