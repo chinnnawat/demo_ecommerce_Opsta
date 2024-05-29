@@ -13,6 +13,19 @@ services:
       - ./backend/mysite:/app
     depends_on:
       - postgres
+
+  frontend:
+    build: 
+      context: ./frontend/
+      dockerfile: Dockerfile
+    container_name: nextjsEcommerce
+    ports:
+      - "3000:3000"
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./frontend:/appFront
+
   postgres:
     image: postgres:latest
     environment:
@@ -33,3 +46,4 @@ networks:
 
 volumes:
   postgres-s-data:
+    driver: local  

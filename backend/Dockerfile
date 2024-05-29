@@ -14,6 +14,7 @@ COPY ./ /app
 
 # Install dependencies specified in requirements.txt
 RUN pip install -r ./mysite/requirements.txt
+RUN pip install djangorestframework
 
 # Expose port 8000
 EXPOSE 8000
