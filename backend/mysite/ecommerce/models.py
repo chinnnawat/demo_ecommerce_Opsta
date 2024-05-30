@@ -35,8 +35,8 @@ class Promotion(models.Model):
     description = models.TextField()
     discount = models.IntegerField()
     start_date = models.DateTimeField()
-    during_date = models.IntegerField()
-    end_date = models.DateTimeField(blank=True)
+    during_date = models.IntegerField(blank=True, null=True)
+    end_date = models.DateTimeField(blank=True, null=True)
     code = models.CharField(max_length=50, unique=True, blank=True)
 
     # save
@@ -49,10 +49,21 @@ class Promotion(models.Model):
         super().save(*args, **kwargs)
             
     # cal
-    def cal_end_date(self):
-        if(self.during_date < 0 ):
-            self.during_date = self.during_date * -1
-        self.end_date = self.start_date + timedelta(days=self.during_date)
+    def cal_end_date(self): 
+        if not self.end_date:
+            if(self.during_date < 0 ):
+                self.during_date = self.during_date * -1
+            self.end_date = self.start_date + timedelta(days=self.during_date)
+        if not self.during_date:
+            self.during_date = (self.end_date - self.start_date).days
+            self.end_date = self.end_date
+        if self.end_date and self.during_date:
+            # depend on during date
+            self.end_date = self.start_date + timedelta(days=self.during_date)
+            
+            # depend on calendar end_date
+            # self.end_date = self.end_date
+            # self.during_date = (self.end_date - self.start_date).days
 
     def gen_code(self):
         self.code = str(uuid.uuid4()).replace("-", "")[:5]
@@ -61,6 +72,7 @@ class Promotion(models.Model):
     def enable_code(self):
         now = timezone.now()
         return self.start_date <= now <= self.end_date
+    
     
     
     def __str__(self):
