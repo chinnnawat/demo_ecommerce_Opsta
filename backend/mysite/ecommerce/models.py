@@ -43,7 +43,7 @@ class Promotion(models.Model):
     def save(self, *args, **kwargs):
         if not self.code:
             self.gen_code()
-            super().save(*args, **kwargs)
+            # super().save(*args, **kwargs)
 
         self.cal_end_date()
         super().save(*args, **kwargs)
@@ -61,6 +61,7 @@ class Promotion(models.Model):
     def enable_code(self):
         now = timezone.now()
         return self.start_date <= now <= self.end_date
+    
     
     def __str__(self):
         return self.name 

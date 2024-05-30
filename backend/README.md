@@ -15,4 +15,9 @@ python manage.py migrate
 python3 manage.py migrate
 python3 manage.py makemigrations ecommerce
 python3 manage.py sqlmigrate ecommerce 0001
+
+## admin
 python manage.py createsuperuser
+
+## test
+python3 manage.py test

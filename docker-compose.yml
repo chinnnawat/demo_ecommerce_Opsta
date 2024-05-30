@@ -38,7 +38,7 @@ services:
     networks:
       - ecommerce-network
     volumes:
-      - postgres-s-data:/var/lib/postgres/data
+      - postgres-s-data:/var/lib/postgresql/data/
 
 networks:
   ecommerce-network:
