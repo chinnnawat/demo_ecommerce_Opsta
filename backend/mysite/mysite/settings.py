@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from .secret import DJANGO_SECRET_CLIENT_ID, JWT_SECRET_SECRET
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -118,8 +119,8 @@ REST_FRAMEWORK = {
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "APP": {
-            "client_id": "386393690955-3hmqrhkp7tmv93j8g8nb8ruup0sa4fdj.apps.googleusercontent.com",  # replace me
-            "secret": "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",        # replace me
+            "client_id": DJANGO_SECRET_CLIENT_ID,  # replace me
+            "secret": JWT_SECRET_SECRET,        # replace me
             "key": "",                               # leave empty
         },
         "SCOPE": [
