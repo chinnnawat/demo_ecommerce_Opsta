@@ -1,7 +1,7 @@
 from django.db import models
 import uuid
 from datetime import timedelta
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -109,4 +109,6 @@ class Order(models.Model):
     
     def __str__(self):
         return f'Order {self.id} by {self.customer}'
+    
+
     
