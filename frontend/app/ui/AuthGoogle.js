@@ -4,6 +4,9 @@ import { useSession, signIn, signOut } from "next-auth/react"
 export default function GoogleProvider(){
     const {data: session} = useSession()
 
+    
+
+
     // sign in success
     if(session){
         return (

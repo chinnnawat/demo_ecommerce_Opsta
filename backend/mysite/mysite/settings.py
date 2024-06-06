@@ -35,6 +35,7 @@ if DEBUG:
 else:
     CORS_ALLOWED_ORIGINS = [
         "http://localhost:3000/",
+        "http://localhost:3000/*",
         "http://127.0.0.1:3000/",
     ]
     
@@ -42,6 +43,19 @@ CORS_ALLOW_CREDENTIALS = True
 # CORS_ORIGIN_WHITELIST = [
 #     'localhost'
 # ]
+
+
+# CSRF_TRUSTED_ORIGINS = ['https://*.mydomain.com','https://*.127.0.0.1']
+
+
+CORS_ALLOW_METHODS = (
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+)
 
 
 # Application definition
@@ -87,8 +101,13 @@ AUTHENTICATION_BACKENDS = (
 
 SITE_ID = 2 
 
+# Allauth settings
 ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = "none"
+# ACCOUNT_USERNAME_REQUIRED = False
+# ACCOUNT_AUTHENTICATION_METHOD = 'email'
+# SOCIALACCOUNT_QUERY_EMAIL = True
+# SOCIALACCOUNT_AUTO_SIGNUP = False
 
 REST_AUTH = {
     "USE_JWT": True,
@@ -139,12 +158,12 @@ SOCIALACCOUNT_PROVIDERS = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'mysite.urls'

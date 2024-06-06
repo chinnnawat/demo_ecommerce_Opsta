@@ -1,22 +1,20 @@
-from rest_framework.serializers import ModelSerializer
-from .models import CustomerUserModel
-from django.conf import settings
+from rest_framework import serializers
+from .models import User
 
-class CustomUserModelSerializer(ModelSerializer):
-  class Meta:
-    model = CustomerUserModel
-    fields = [
-      "userId",
-      "username",
-      "email",
-      "password",
-    ]
-
-  def create(self, validated_data):
-    user = CustomerUserModel.objects.create(
-      validated_data["username"],
-      validated_data["email"],
-      validated_data["password"]
-    )
-
-    return user
+class RegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email', 'name', 'lastname']
+        
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            email=validated_data['email'],
+            name=validated_data['name'],
+            lastname=validated_data['lastname'],
+            password=validated_data['email'],
+        )
+        return user
+    
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.EmailField(write_only=True)

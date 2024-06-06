@@ -1,53 +1,53 @@
 from django.db import models
-from django.contrib.auth.models import User, AbstractBaseUser, BaseUserManager, PermissionsMixin
-from uuid import uuid4
+from django.contrib.auth.models import (
+    AbstractBaseUser, BaseUserManager, PermissionsMixin, UserManager
+)
+from django.utils import timezone
 
-# Create your models here.
-
-# user Model on Google
-class CustomeerModelManager(BaseUserManager):
-    def create_user(self, username, email, password=None):
-        # create customer
-        user= self.model(
-            username = username,
-            email = self.normalize_email(email)
-        )
-        
-        user.set_password(password)
-        user.save(using = self._db)
-        
+class MyUserManager(UserManager):
+    def _create_user(self, email, password, **extra_fields):
+        if not email:
+            raise ValueError('The given email must be set')
+        email = self.normalize_email(email)
+        user = self.model(email=email,password = email, **extra_fields)
+        user.save(using=self._db)
         return user
 
+    def create_user(self, email, password=None, **extra_fields):
+        if password is None:
+            password = email  # ให้รหัสผ่านเป็นอีเมล
+        
+        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_superuser', False)
+        
+        return self._create_user(email, password, **extra_fields)
 
-class CustomerUserModel(AbstractBaseUser, PermissionsMixin):
-    userId = models.CharField(max_length=16, default=uuid4, primary_key=True, editable=False)
-    username = models.CharField(max_length=16, unique=True, null=False, blank=False)
-    email = models.EmailField(max_length=100, unique=True, null=False, blank=False)
-
-    # Add related_name for groups and user_permissions
+class User(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(blank=False, unique=True)
+    name = models.CharField(max_length=150)
+    lastname = models.CharField(max_length=150)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    date_joined = models.DateTimeField(default=timezone.now)
+    
     groups = models.ManyToManyField(
         'auth.Group',
+        related_name='custom_user_set',
         blank=True,
-        related_name='customer_users'  # New argument
+        help_text=('The groups this user belongs to. A user will get all permissions '
+                   'granted to each of their groups.'),
+        related_query_name='user',
     )
+    
     user_permissions = models.ManyToManyField(
         'auth.Permission',
+        related_name='custom_user_set',
         blank=True,
-        related_name='customer_users'  # New argument
+        help_text='Specific permissions for this user.',
+        related_query_name='user',
     )
-    
-    USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["email"]
-    
-    active = models.BooleanField(default=True)
-    
-    is_staff = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
-    
-    created_on = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    updated_at = models.DateTimeField(auto_now_add=True)
-    
-    objects = CustomeerModelManager()
-    
-    class Meta:
-        verbose_name = "Customer User"
+
+    objects = MyUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name', 'lastname']
