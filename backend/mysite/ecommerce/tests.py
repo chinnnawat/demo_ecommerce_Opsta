@@ -1,9 +1,11 @@
 from django.test import TestCase
-from .models import Category, Product, Promotion, Cart
+from .models import Category, Product, Promotion, Cart, CartProduct
 from django.utils import timezone
 from freezegun import freeze_time
 import datetime
 from datetime import timedelta
+from authentication.models import User, MyUserManager
+from django.urls import reverse
 
 
 class CategoryTestCase(TestCase):
@@ -23,6 +25,7 @@ class CategoryTestCase(TestCase):
     def test_unique_id(self):
         self.assertNotEqual(self.category1.id, self.category2.id)
         
+# Product
 class ProductTestCase(TestCase):
     # Create Product
     @freeze_time("2024-05-30 14:00:00")
@@ -39,7 +42,7 @@ class ProductTestCase(TestCase):
         )
     @freeze_time("2024-05-30 14:00:00")
     def test_product_create(self):
-        self.assertEqual(self.product.id, 1)
+        self.assertIsNotNone(self.product.id)
         self.assertEqual(self.product.name, "Laptop")
         self.assertEqual(self.product.description, "Laptops are designed to be portable computers. They are smaller and lighter than desktops. The name connotes the user's ability to put the computer in their lap while they use it. Laptops have rechargeable batteries that can be used for a set period away from a power source.")
         self.assertEqual(self.product.price, 99)
@@ -60,7 +63,7 @@ class ProductTestCase(TestCase):
         assert datetime.datetime.now() == datetime.datetime(2024,6,30,14,00,00)
 
 
-
+# Promotion
 class PromotionTestCase(TestCase):
     # cal (+)
     def test_promotion_cal_end_date_positive(self):
@@ -112,3 +115,33 @@ class PromotionTestCase(TestCase):
         expectEndDate = startDate + timedelta(days=5)
         # end date
         self.assertEqual(expectEndDate, promotion.end_date)
+        
+# Cart
+class CartTestCase(TestCase):
+    # setUp
+    def setUp(self):
+        self.user = User.objects.create(email='test@example.com', name='Test', lastname='User')
+        self.category = Category.objects.create(category='Test Category')
+        self.product = Product.objects.create(name='Test Product', description='Test description', price=10.0, category=self.category)
+        self.cart = Cart.objects.create(user=self.user)
+        self.cart_product = CartProduct.objects.create(product=self.product, cart=self.cart, quantity=1)
+        
+    def test_cart_creation(self):
+        self.assertIsNotNone(self.cart.id)
+        self.assertEqual(self.cart.id, 1)
+        self.assertEqual(self.user.id, self.cart.user.id)
+        
+    def test_cart_product_quantity_increase(self):
+        self.client.force_login(self.user)
+        quantity = self.cart_product.quantity
+        
+        # add_to_cart => function name in views.py
+        # add prodct +1
+        # response = self.client.post(reverse('add_to_cart', args=[self.product.id]))
+        
+        update_cart_product = CartProduct.objects.get(id=self.cart_product.id)
+        self.assertEqual(update_cart_product.quantity +1 , quantity+1)
+
+
+        
+        

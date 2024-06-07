@@ -1,7 +1,8 @@
 from django.db import models
 import uuid
 from datetime import timedelta
-from django.contrib.auth.models import User, AbstractBaseUser, BaseUserManager, PermissionsMixin
+# from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from authentication.models import User
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -33,7 +34,7 @@ class Product(models.Model):
 class Promotion(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
-    discount = models.IntegerField()
+    discount = models.IntegerField(default=10)
     start_date = models.DateTimeField()
     during_date = models.IntegerField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
@@ -81,34 +82,34 @@ class Promotion(models.Model):
 # Cart model
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ManyToManyField(Product)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Cart {self.id} for {self.user.username}"
-
-
-# Customer
-class Customer(models.Model):
-    firstName = models.CharField(max_length=200)
-    lastName = models.CharField(max_length=200)
-    email = models.EmailField(max_length=100)
-    password = models.CharField(max_length=100)
-    phone = models.CharField(max_length=10)
     
-    def __str__(self):
-        return f'{self.firstName} {self.lastName}'
+# Cart Items
+class CartProduct(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
     
 
 # Order
 class Order(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    product = models.ManyToManyField(Product)
+    customer = models.ForeignKey(User, on_delete=models.CASCADE)
+    promotion = models.ForeignKey(Promotion, on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.IntegerField(default=1)
+    phoneNumber = models.CharField(max_length=10, blank=True)
     address = models.CharField(max_length=100, default='', blank=True)
     date = models.DateField(default=timezone.now)
     
     def __str__(self):
         return f'Order {self.id} by {self.customer}'
     
+class OrderProduct(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
 
     

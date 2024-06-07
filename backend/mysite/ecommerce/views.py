@@ -17,8 +17,12 @@ class DetailProduct(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     
     @action(methods=["GET"], detail=False)
-    def getProduct(self, request):
+    def getProduct(self):
         # queryProduct = Product.objects.get.all()
         queryset = Product.objects.get.all()
         # showProducts = ProductSerializer(queryProduct, many = True, context={'request': request})
         return Response(queryset)
+
+# 
+    
+# class create_order()
