@@ -5,7 +5,6 @@ from .models import Product, Cart, CartProduct, Promotion, Category
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    # category = serializers.PrimaryKeyRelatedField(read_only=True) => show id
     category = serializers.StringRelatedField() # show name
     class Meta:
         model = Product

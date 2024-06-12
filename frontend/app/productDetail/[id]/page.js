@@ -85,6 +85,11 @@ export default function ProductDetail({ params }) {
             }
             const data = await response.json();
             console.log('Success:', data);
+
+            // get user_id from response
+            const userId = data.user_id;
+            console.log('User ID:', userId);
+
         } catch (error) {
             console.error('Error:', error);
         }

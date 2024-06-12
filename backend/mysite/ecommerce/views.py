@@ -57,7 +57,7 @@ class CartViewSet(viewsets.ModelViewSet):
     
     @action(methods=["post"], detail=False)
     def add_to_cart(self, request):
-        user = request.data.get('user')  # รับข้อมูลผู้ใช้ที่ล็อกอินอยู่
+        user = request.data.get('user') #  รับข้อมูลผู้ใช้ที่ล็อกอินอยู่
         quantity = request.data.get('quantity')
         product_id = request.data.get('product')
         price_unit = request.data.get('price')
@@ -78,7 +78,7 @@ class CartViewSet(viewsets.ModelViewSet):
         user_id = get_object_or_404(User, email=user)
         print("User ID : ", user_id.id)
         
-        # generate Cart and CartProduct
+        # generate Cart
         cart, created = Cart.objects.get_or_create(user=user_id)
         print("Cart : ",cart)
         
@@ -96,8 +96,36 @@ class CartViewSet(viewsets.ModelViewSet):
         # Update total price in cart
         cart.update_total_price()
         print("Cart Product : ",cart_product)
+        
+        
+        # response_data to frontend
+        respone_data = {
+            "message": "Product added to cart successfully",
+            "user_id" : user_id.id,
+        }
 
 
-        return Response(f"Product added to cart successfully with quantity")
+        return Response(respone_data)
+    
+
+
+
+
+class ShowCartViewSet(viewsets.ModelViewSet):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+    
+    @action(methods=["POST"], detail=False)
+    def show_detal_cart(self, request):
+        user_email = request.data.get('user')
+        user = get_object_or_404(User ,email=user_email)
+        
+        print(user)
+        
+        # user = User.objects.get(email=request.user)
+        # cart = Cart.objects.get(user=user)
+        # cart_products = CartProduct.objects.filter(cart=cart)
+        # serializer = CartProductSerializer(cart_products, many=True)
+        return Response("serializer.data")
     
     

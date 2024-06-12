@@ -2,6 +2,21 @@
 import { useSession, signIn, signOut } from "next-auth/react"
 import { useState } from 'react'
 
+
+// async function getUserID() {
+//     const res = await fetch('https://api.example.com/...')
+//     // The return value is *not* serialized
+//     // You can return Date, Map, Set, etc.
+   
+//     if (!res.ok) {
+//       // This will activate the closest `error.js` Error Boundary
+//       throw new Error('Failed to fetch data')
+//     }
+   
+//     return res.json()
+//   }
+
+
 export default function NavBar() {
     const { data: session } = useSession()
     const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -11,8 +26,45 @@ export default function NavBar() {
         setDropdownOpen(!dropdownOpen)
     }
 
+
+    
+
+
     const handleLinkClick = (link) => {
         setActiveLink(link)
+    }
+
+    const handleToCart = async () => {
+        // console.log("hi");
+        if (!session || !session.user) {
+            console.error('No user session found');
+            return;
+        }
+
+        const data = {
+            user: session.user?.email,  // User email
+        };
+        console.log(data);
+
+        try {
+            const response = await fetch('http://localhost:8000/api/show_cart/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+            if (!response.ok) {
+                throw new Error('Failed to show cart');
+            }
+
+            const dataUser = await response.json();
+            console.log('Success:', dataUser);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+        
+        
     }
 
     return (
@@ -85,18 +137,6 @@ export default function NavBar() {
                     </div>
                 )}
                 <div className="item-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-user">
-                    {/* <form className="max-w-md mx-auto">
-                        <label for="default-search" className="mb-2 text-sm font-medium text-gray-900 sr-only">Search</label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                                <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                                </svg>
-                            </div>
-                            <input type="search" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search Mockups, Logos..." required />
-                            <button type="submit" class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
-                        </div>
-                    </form> */}
                     <ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg  md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 text-white">
                         <li>
                             <a 
@@ -139,7 +179,7 @@ export default function NavBar() {
                             <a 
                                 href="/cart" 
                                 className={`block py-2 px-3 hover:bg-yellow-300 md:hover:bg-transparent md:hover:text-yellow-300 md:p-0 ${activeLink === 'cart' ? 'text-yellow-300' : ''}`} 
-                                onClick={() => handleLinkClick('cart')}
+                                onClick={handleToCart}
                             >
                                 Cart
                             </a>
