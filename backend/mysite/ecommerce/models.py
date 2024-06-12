@@ -1,7 +1,6 @@
 from django.db import models
 import uuid
 from datetime import timedelta
-# from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from authentication.models import User
 from django.utils import timezone
 from rest_framework import serializers
@@ -79,21 +78,38 @@ class Promotion(models.Model):
     def __str__(self):
         return self.name 
 
-# Cart model
+
+# Cart model    
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    product = models.ManyToManyField(Product)
+    # product = models.ManyToManyField(CartProduct, blank=True)
+    totalPrice = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Cart {self.id} for {self.user.username}"
+        return f"Cart {self.id} for {self.user}"
+
+    def update_total_price(self):
+        self.totalPrice = sum(item.product.price * item.quantity for item in self.cart_products.all())
+        self.save()
     
 # Cart Items
 class CartProduct(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='cart_products', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return self.product.name
     
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.cart.update_total_price()
+
+    def delete(self, *args, **kwargs):
+        cart = self.cart
+        super().delete(*args, **kwargs)
+        cart.update_total_price()
 
 # Order
 class Order(models.Model):

@@ -43,6 +43,7 @@ class AuthViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     
+    
     @action(methods=['post'], detail=False, url_path='login')   
     def login_user(self, request):
         user_data = request.data.get('userData')

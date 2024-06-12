@@ -38,9 +38,9 @@ export default function SendUserDataToLoginAPI(){
         }
     }, [session]);
 
-    return(
-        <div>
-            {response && <div>Response from backend: {JSON.stringify(response)}</div>}
-        </div>
-    )
+    // return(
+    //     <div>
+    //         {response && <div>Response from backend: {JSON.stringify(response)}</div>}
+    //     </div>
+    // )
 }
