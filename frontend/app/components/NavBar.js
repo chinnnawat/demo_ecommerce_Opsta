@@ -17,38 +17,6 @@ export default function NavBar() {
         setActiveLink(link)
     }
 
-    // const handleToCart = async () => {
-    //     if (!session || !session.user) {
-    //         console.error('No user session found');
-    //         return;
-    //     }
-
-    //     const data = {
-    //         email: session.user?.email,  // User email
-    //     };
-
-    //     try {
-    //         const response = await fetch('http://localhost:8000/api/user/get_user_info/', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify(data),
-    //         });
-
-    //         const user_id = await response.json();
-    //         console.log(user_id);
-    //         if (!response.ok) {
-    //             throw new Error('Failed to show cart');
-    //         }
-
-
-    //     } catch (error) {
-    //         console.error('Error:', error);
-    //     }
-        
-        
-    // }
 
     return (
         <nav className="bg-[#FF7F3E] border-gray-200">
@@ -58,6 +26,7 @@ export default function NavBar() {
                     <span className="self-center text-2xl font-semibold whitespace-nowrap"></span>
                 </a>
 
+                {/* search */}
                 <form className="w-[600px]">
                         <label for="default-search" className="mb-2 text-sm font-medium text-gray-900 sr-only">Search</label>
                         <div className="relative">
@@ -66,7 +35,7 @@ export default function NavBar() {
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                                 </svg>
                             </div>
-                        <input type="search" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 " placeholder="Search Mockups, Logos..." required />
+                        <input type="search" id="default-search" disabled class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 cursor-not-allowed" placeholder="Function for future . . . " required />
                         {/* <button type="submit" class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 ">Search</button> */}
                     </div>
                 </form>

@@ -1,6 +1,6 @@
 # from django.contrib.auth.models import Group, User
 from rest_framework import serializers
-from .models import Product, Cart, CartProduct, Promotion, Category
+from .models import Product, Cart, CartProduct, Promotion, Category, Order
 
 
 
@@ -28,3 +28,4 @@ class PromotionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Promotion
         fields = '__all__'
+        

@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signIn, signOut } from 'next-auth/react';
+
 
 export default function ProductDetail({ params }) {
     const productId = params.id;
@@ -9,6 +10,7 @@ export default function ProductDetail({ params }) {
     const [quantity, setQuantity] = useState(1);
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [notification, setNotification] = useState('');
 
     const { data: session, status } = useSession();
 
@@ -81,6 +83,14 @@ export default function ProductDetail({ params }) {
             const userId = data.user_id;
             console.log('User ID:', userId);
 
+
+            // ตั้งค่า notification
+            setNotification('Product added to cart successfully!');
+            setTimeout(() => {
+                setNotification('');
+            }, 1500); // ลบข้อความแจ้งเตือนหลังจาก 3 วินาที
+    
+
         } catch (error) {
             console.error('Error:', error);
         }
@@ -88,6 +98,11 @@ export default function ProductDetail({ params }) {
 
     return (
         <div className='font-sans bg-white'>
+            {notification && (
+                <div className="fixed top-100 left-100 right-0 bg-green-500 text-white text-center p-4">
+                    {notification}
+                </div>
+)}
             <div className='p-6 lg:max-w-7xl max-w-4xl mx-auto'>
                 <div className='grid items-start grid-cols-1 lg:grid-cols-5 gap-12 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.3)] p-6'>
                     <div className='lg:col-span-3 w-full lg:sticky top-0 text-center'>
@@ -123,7 +138,36 @@ export default function ProductDetail({ params }) {
                             </p>
                         </div>
                         <div className="flex flex-wrap gap-4 mt-10">
-                            <button type="button" onClick={handleAddToCart} className="min-w-[200px] px-4 py-2.5 border border-[#333] bg-transparent hover:bg-[#FF7F3E] text-[#333] text-sm font-semibold rounded hover:text-white hover:border-white" disabled={product.stock === 0}>Add to cart</button>
+                            {session && session.user ? (
+                                product.stock === 0 ? (
+                                    <button 
+                                        type="button" 
+                                        onClick={handleAddToCart} 
+                                        className="min-w-[200px] px-4 py-2.5 border border-[#7e7d7d] text-white-500 font-bold rounded opacity-50 cursor-not-allowed" 
+                                        disabled
+                                    >
+                                        Out of stock
+                                    </button>
+                                ) : (
+                                    <button 
+                                        type="button" 
+                                        onClick={handleAddToCart} 
+                                        className="min-w-[200px] px-4 py-2.5 border border-[#333] bg-transparent hover:bg-[#FF7F3E] text-[#333] text-sm font-semibold rounded hover:text-white hover:border-white"
+                                        
+                                    >
+                                        Add to cart
+                                    </button>
+                                )
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => signIn()}
+                                    className="min-w-[200px] px-4 py-2.5 border border-[#f00] bg-transparent hover:bg-[#FF7F3E] text-[#ff3131] text-sm font-semibold rounded hover:text-white hover:border-white"
+                                    
+                                >
+                                    Sign in to add to cart
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

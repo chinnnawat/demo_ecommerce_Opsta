@@ -1,9 +1,9 @@
-from decimal import Decimal
+from decimal import Decimal, ROUND_DOWN
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse
 
 from authentication.serializers import RegisterSerializer
-from .models import Product, Cart, CartProduct, Promotion
+from .models import Product, Cart, CartProduct, Promotion, Order
 from django.http import JsonResponse
 from rest_framework import serializers, permissions, viewsets
 from rest_framework.response import Response
@@ -13,6 +13,8 @@ from .serializers import  ProductSerializer, CartSerializer, CartProductSerializ
 from rest_framework import status
 import json
 from django.contrib.auth import  login
+from django.db.models import Sum, F
+from django.utils import timezone
 
 # Create your views here.
 def index(request):
@@ -170,13 +172,71 @@ class CartViewSet(viewsets.ModelViewSet):
         cart.update_total_price()
         
         return Response({"message": "Product removed from cart", "totalPrice": cart.totalPrice})
+    
+    
+    @action(methods=["POST"], detail=False)
+    def checkout(self, request):
+        user_email = request.data.get('user')
+        
+        if not user_email:
+            return Response({"error": "User email is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = get_object_or_404(User, email=user_email)
+        cart = get_object_or_404(Cart, user=user)
+        cart_products = CartProduct.objects.filter(cart=cart)
+        
+        if not cart_products.exists():
+            return Response({"error": "No products in cart"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Cal sum price
+        sum_price = cart_products.aggregate(total=Sum(F('product__price') * F('quantity')))['total'] or Decimal(0)
+        
+        # Cal discount
+        promotions = Promotion.objects.all()
+        best_promotion = None
+        best_total = sum_price
+        savings = Decimal(0)
+        
+        for promotion in promotions:
+            if promotion.enable_code():
+                if promotion.discount > 10 and sum_price >= 1000:
+                    total_with_discount = sum_price * (1 - Decimal(promotion.discount / 100))
+                    if total_with_discount < best_total:
+                        best_total = total_with_discount
+                        best_promotion = promotion
+                
+                elif promotion.discount <= 10 and sum_price < 1000:
+                    total_with_discount = sum_price * (1 - Decimal(promotion.discount / 100))
+                    if total_with_discount < best_total:
+                        best_total = total_with_discount
+                        best_promotion = promotion
+                
+                savings = sum_price - best_total
+        
+        # สร้าง Order
+        order = Order.objects.create(
+            customer=user,
+            promotion=best_promotion,
+            quantity=cart_products.count(),
+            totalPrice=best_total,
+            date=timezone.now()
+        )
+        
+        for cart_product in cart_products:
+            order.product.add(cart_product.product)
+            cart_product.delete()
+        
+        cart.update_total_price()  # อัปเดต totalPrice ของ cart
+        
+        return Response({"message": "Order placed successfully", "totalPrice": best_total}, status=status.HTTP_201_CREATED)
         
         
 
 class ShowCartViewSet(viewsets.ModelViewSet):
+    
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
-
+    
     @action(methods=["POST"], detail=False)
     def show_detal_cart(self, request):
         user_id = request.data.get('user_id')
@@ -188,10 +248,81 @@ class ShowCartViewSet(viewsets.ModelViewSet):
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
-        carts = Cart.objects.filter(user=user)
-        serializer = self.get_serializer(carts, many=True)
         
-        return Response(serializer.data)
+        cart = Cart.objects.filter(user=user)
+        if not cart:
+            return Response({"error": "Cart not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        cart = cart.first()
+        cart_products = CartProduct.objects.filter(cart=cart)
+        
+        # Cal sum price
+        sum_price = cart_products.aggregate(total=Sum(F('product__price') * F('quantity')))['total'] or Decimal(0)
+        
+        # Cal discount
+        promotions = Promotion.objects.all()
+        # print(promotions)
+        best_promotion = None
+        best_total = sum_price
+        savings = Decimal(0)
+        
+        for promotion in promotions:
+            if promotion.enable_code():
+                # 15% more than 1000
+                if promotion.discount > 10 and sum_price >= 1000:
+                    total_with_discount = sum_price * (1 - Decimal(promotion.discount / 100))
+                    best_promotion = promotion
+                    best_total = total_with_discount
+                
+                # 10% less than 1000
+                if promotion.discount <= 10 and sum_price < 1000:
+                    total_with_discount = sum_price * (1 - Decimal(promotion.discount / 100))
+                    best_promotion = promotion
+                    best_total = total_with_discount
+
+                savings = sum_price - best_total
+            
+            else:
+                best_promotion = None
+                best_total = sum_price
+                savings = Decimal(0)
+        
+        
+        savings = savings.quantize(Decimal('0.01'), rounding=ROUND_DOWN)
+        serializer = self.get_serializer(cart)
+        response_data = {
+            "cart": [serializer.data],  # Wrap cart data in an array
+            "sum_price": sum_price,
+            "savings": round(savings, 2),
+            "total": round(best_total, 2),
+            "promotion": best_promotion.name if best_promotion else "No promotion applied"
+        }
+        
+        return Response(response_data)
     
     
+    
+
+        
+        
+    
+    
+    # queryset = Cart.objects.all()
+    # serializer_class = CartSerializer
+
+    # @action(methods=["POST"], detail=False)
+    # def show_detal_cart(self, request):
+    #     user_id = request.data.get('user_id')
+        
+    #     if not user_id:
+    #         return Response({"error": "user_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+    #     try:
+    #         user = User.objects.get(id=user_id)
+    #     except User.DoesNotExist:
+    #         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    #     carts = Cart.objects.filter(user=user)
+    #     serializer = self.get_serializer(carts, many=True)
+        
+    #     return Response(serializer.data)

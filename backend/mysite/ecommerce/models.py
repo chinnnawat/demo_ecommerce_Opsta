@@ -96,7 +96,7 @@ class Cart(models.Model):
 class CartProduct(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='cart_products', blank=True, null=True)
-    quantity = models.PositiveIntegerField(default=0)
+    quantity = models.PositiveIntegerField(default=1)
 
     def __str__(self):
         return self.product.name
@@ -119,9 +119,16 @@ class Order(models.Model):
     phoneNumber = models.CharField(max_length=10, blank=True)
     address = models.CharField(max_length=100, default='', blank=True)
     date = models.DateField(default=timezone.now)
+    totalPrice = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
+    # def __str__(self):
+    #     return f'Order {self.id} by {self.customer}'
     
     def __str__(self):
-        return f'Order {self.id} by {self.customer}'
+        return f'Order {self.id} by {self.customer} with total {self.totalPrice}'
+
+    def get_promotion_name(self):
+        return self.promotion.name if self.promotion else 'No promotion'
     
 class OrderProduct(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
