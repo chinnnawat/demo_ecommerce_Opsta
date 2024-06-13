@@ -12,6 +12,7 @@ class ProductSerializer(serializers.ModelSerializer):
         
         
 class CartProductSerializer(serializers.ModelSerializer):
+    product = ProductSerializer()
     class Meta:
         model = CartProduct 
         fields = ['product', 'quantity' ]
@@ -21,7 +22,7 @@ class CartSerializer(serializers.ModelSerializer):
     cart_products = CartProductSerializer(many=True, read_only=True)
     class Meta:
         model = Cart 
-        fields = ['totalPrice', 'created_at', 'cart_products']
+        fields = ['created_at', 'cart_products', 'totalPrice']
         
 class PromotionSerializer(serializers.ModelSerializer):
     class Meta:

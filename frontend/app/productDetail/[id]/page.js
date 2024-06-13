@@ -21,7 +21,7 @@ export default function ProductDetail({ params }) {
                 }
                 const data = await response.json();
                 setProduct(data);
-                setQuantity(data.quantity || 1); // Set initial quantity
+                setQuantity(data.quantity || 1);
             } catch (error) {
                 setError(error);
             } finally {
@@ -54,27 +54,20 @@ export default function ProductDetail({ params }) {
             return;
         }
 
-        // const [firstName, lastName] = session.user?.name.split(" ");
         const cartData = {
             user: session.user?.email,
             product: product.id,
             quantity: quantity,
-            // firstName: firstName,
-            // lastName: lastName
-            // price: product.price,
         };
 
         console.log('Sending cart data:', cartData);
 
-        // console.log("hi");
-
         try {
             const response = await fetch('http://localhost:8000/api/add_cart/add_to_cart/', {
-            // const response = await fetch('https://www.google.co.uk/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.accessToken}`, // ถ้ามีการใช้ token
+                    'Authorization': `Bearer ${session.accessToken}`,
                 },
                 body: JSON.stringify(cartData),
             });
@@ -85,17 +78,12 @@ export default function ProductDetail({ params }) {
             }
             const data = await response.json();
             console.log('Success:', data);
-
-            // get user_id from response
             const userId = data.user_id;
             console.log('User ID:', userId);
 
         } catch (error) {
             console.error('Error:', error);
         }
-
-        // const response = await fetch('http://localhost:8000/api/add_cart/');
-        // console.log(response);
     };
 
     return (

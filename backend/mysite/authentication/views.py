@@ -5,9 +5,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, GetInfoSerializer
 from django.contrib.auth import  login
 from .models import User
+from django.shortcuts import get_object_or_404
 
 
 class UserInfo(APIView):
@@ -80,4 +81,30 @@ class AuthViewSet(viewsets.ModelViewSet):
                 "user": RegisterSerializer(user).data,
                 "message": "User registered successfully"
             }, status=status.HTTP_201_CREATED)
+            
+            
+# get user info
+class GetUserInfoView(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = GetInfoSerializer
+    
+    @action(methods=['post'], detail=False)
+    def get_user_info(self, request):
+        user_email = request.data.get('email')
+        user_id = get_object_or_404(User, email=user_email)
+        print(user_id.id)
+        if not user_email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # user = User.objects.get(email=user_email)
+            respone_data = {
+            "user_id" : user_id.id,
+        }
+            return Response(respone_data)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+    
+    
         

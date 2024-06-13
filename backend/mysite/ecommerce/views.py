@@ -62,6 +62,7 @@ class CartViewSet(viewsets.ModelViewSet):
         product_id = request.data.get('product')
         price_unit = request.data.get('price')
         
+        
         print("Current User : ", user)
         print("Quantity : ", quantity)
         print("Product ID : ", product_id)
@@ -98,6 +99,12 @@ class CartViewSet(viewsets.ModelViewSet):
         print("Cart Product : ",cart_product)
         
         
+        
+        cart_product_detail = get_object_or_404(Cart, user=user_id)
+        
+        print(cart_product_detail.id)
+        
+        
         # response_data to frontend
         respone_data = {
             "message": "Product added to cart successfully",
@@ -107,25 +114,84 @@ class CartViewSet(viewsets.ModelViewSet):
 
         return Response(respone_data)
     
-
-
-
+    
+    @action(methods=["post"], detail=False)
+    def plus(self, request):
+        user_email = request.data.get('user')
+        product_id = request.data.get('product')
+        
+        product = get_object_or_404(Product, id=product_id)
+        user = get_object_or_404(User, email=user_email)
+        
+        cart = get_object_or_404(Cart, user=user)
+        cart_product = get_object_or_404(CartProduct, product=product, cart=cart)
+        
+        cart_product.quantity += 1
+        cart_product.save()
+        cart.update_total_price()
+        
+        return Response({"message": "Product quantity increased", "quantity": cart_product.quantity, "totalPrice": cart.totalPrice})
+    
+    @action(methods=["post"], detail=False)
+    def minus(self, request):
+        user_email = request.data.get('user')
+        product_id = request.data.get('product')
+        
+        product = get_object_or_404(Product, id=product_id)
+        user = get_object_or_404(User, email=user_email)
+        
+        cart = get_object_or_404(Cart, user=user)
+        cart_product = get_object_or_404(CartProduct, product=product, cart=cart)
+        
+        if cart_product.quantity >= 1:
+            cart_product.quantity -= 1
+            cart_product.save()
+            cart.update_total_price()
+            message = "Product quantity decreased"
+        if cart_product.quantity == 0:
+            cart_product.delete()
+            cart.update_total_price()
+            message = "Product removed from cart"
+            
+        return Response({"message": message, "quantity": cart_product.quantity if cart_product.quantity > 0 else 0, "totalPrice": cart.totalPrice})
+    
+    @action(methods=["post"], detail=False)
+    def remove(self, request):
+        user_email = request.data.get('user')
+        product_id = request.data.get('product')
+        
+        product = get_object_or_404(Product, id=product_id)
+        user = get_object_or_404(User, email=user_email)
+        
+        cart = get_object_or_404(Cart, user=user)
+        cart_product = get_object_or_404(CartProduct, product=product, cart=cart)
+        
+        cart_product.delete()
+        cart.update_total_price()
+        
+        return Response({"message": "Product removed from cart", "totalPrice": cart.totalPrice})
+        
+        
 
 class ShowCartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
-    
+
     @action(methods=["POST"], detail=False)
     def show_detal_cart(self, request):
-        user_email = request.data.get('user')
-        user = get_object_or_404(User ,email=user_email)
+        user_id = request.data.get('user_id')
         
-        print(user)
+        if not user_id:
+            return Response({"error": "user_id is required"}, status=status.HTTP_400_BAD_REQUEST)
         
-        # user = User.objects.get(email=request.user)
-        # cart = Cart.objects.get(user=user)
-        # cart_products = CartProduct.objects.filter(cart=cart)
-        # serializer = CartProductSerializer(cart_products, many=True)
-        return Response("serializer.data")
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        carts = Cart.objects.filter(user=user)
+        serializer = self.get_serializer(carts, many=True)
+        
+        return Response(serializer.data)
     
     

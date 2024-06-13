@@ -15,6 +15,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         return user
     
+class GetInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email']
+    
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.EmailField(write_only=True)

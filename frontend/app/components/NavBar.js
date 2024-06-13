@@ -3,20 +3,6 @@ import { useSession, signIn, signOut } from "next-auth/react"
 import { useState } from 'react'
 
 
-// async function getUserID() {
-//     const res = await fetch('https://api.example.com/...')
-//     // The return value is *not* serialized
-//     // You can return Date, Map, Set, etc.
-   
-//     if (!res.ok) {
-//       // This will activate the closest `error.js` Error Boundary
-//       throw new Error('Failed to fetch data')
-//     }
-   
-//     return res.json()
-//   }
-
-
 export default function NavBar() {
     const { data: session } = useSession()
     const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -25,47 +11,44 @@ export default function NavBar() {
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen)
     }
-
-
-    
-
+  
 
     const handleLinkClick = (link) => {
         setActiveLink(link)
     }
 
-    const handleToCart = async () => {
-        // console.log("hi");
-        if (!session || !session.user) {
-            console.error('No user session found');
-            return;
-        }
+    // const handleToCart = async () => {
+    //     if (!session || !session.user) {
+    //         console.error('No user session found');
+    //         return;
+    //     }
 
-        const data = {
-            user: session.user?.email,  // User email
-        };
-        console.log(data);
+    //     const data = {
+    //         email: session.user?.email,  // User email
+    //     };
 
-        try {
-            const response = await fetch('http://localhost:8000/api/show_cart/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
-            if (!response.ok) {
-                throw new Error('Failed to show cart');
-            }
+    //     try {
+    //         const response = await fetch('http://localhost:8000/api/user/get_user_info/', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify(data),
+    //         });
 
-            const dataUser = await response.json();
-            console.log('Success:', dataUser);
-        } catch (error) {
-            console.error('Error:', error);
-        }
+    //         const user_id = await response.json();
+    //         console.log(user_id);
+    //         if (!response.ok) {
+    //             throw new Error('Failed to show cart');
+    //         }
+
+
+    //     } catch (error) {
+    //         console.error('Error:', error);
+    //     }
         
         
-    }
+    // }
 
     return (
         <nav className="bg-[#FF7F3E] border-gray-200">
@@ -176,10 +159,10 @@ export default function NavBar() {
                             </a>
                         </li>
                         <li>
-                            <a 
+                        <a 
                                 href="/cart" 
-                                className={`block py-2 px-3 hover:bg-yellow-300 md:hover:bg-transparent md:hover:text-yellow-300 md:p-0 ${activeLink === 'cart' ? 'text-yellow-300' : ''}`} 
-                                onClick={handleToCart}
+                                className={`block py-2 px-3 hover:bg-yellow-300 md:hover:bg-transparent md:hover:text-yellow-300 md:p-0 ${activeLink === 'contact' ? 'text-yellow-300' : ''}`} 
+                                onClick={() => handleLinkClick('contact')}
                             >
                                 Cart
                             </a>
