@@ -141,8 +141,7 @@ export default function ProductDetail({ params }) {
                             {session && session.user ? (
                                 product.stock === 0 ? (
                                     <button 
-                                        type="button" 
-                                        onClick={handleAddToCart} 
+                                        type="button"
                                         className="min-w-[200px] px-4 py-2.5 border border-[#7e7d7d] text-white-500 font-bold rounded opacity-50 cursor-not-allowed" 
                                         disabled
                                     >
@@ -151,7 +150,7 @@ export default function ProductDetail({ params }) {
                                 ) : (
                                     <button 
                                         type="button" 
-                                        onClick={handleAddToCart} 
+                                        onClick={() => handleAddToCart(product.id, quantity)} 
                                         className="min-w-[200px] px-4 py-2.5 border border-[#333] bg-transparent hover:bg-[#FF7F3E] text-[#333] text-sm font-semibold rounded hover:text-white hover:border-white"
                                         
                                     >

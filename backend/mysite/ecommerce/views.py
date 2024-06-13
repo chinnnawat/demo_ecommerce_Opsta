@@ -96,6 +96,10 @@ class CartViewSet(viewsets.ModelViewSet):
         
         print("Cart Product : ", cart_product)
         
+        # Update the stock of the product
+        product.stock -= int(quantity)
+        product.save()
+        
         # Update total price in cart
         cart.update_total_price()
         print("Cart Product : ",cart_product)
@@ -130,6 +134,11 @@ class CartViewSet(viewsets.ModelViewSet):
         
         cart_product.quantity += 1
         cart_product.save()
+        
+        # Update the stock of the product
+        product.stock -= 1
+        product.save()
+        
         cart.update_total_price()
         
         return Response({"message": "Product quantity increased", "quantity": cart_product.quantity, "totalPrice": cart.totalPrice})
@@ -148,12 +157,19 @@ class CartViewSet(viewsets.ModelViewSet):
         if cart_product.quantity >= 1:
             cart_product.quantity -= 1
             cart_product.save()
-            cart.update_total_price()
-            message = "Product quantity decreased"
+            
+            
+            # Update the stock of the product
+            product.stock += 1
+            product.save()
+        
         if cart_product.quantity == 0:
             cart_product.delete()
             cart.update_total_price()
             message = "Product removed from cart"
+        else:
+            cart.update_total_price()
+            message = "Product quantity decreased"
             
         return Response({"message": message, "quantity": cart_product.quantity if cart_product.quantity > 0 else 0, "totalPrice": cart.totalPrice})
     
@@ -167,6 +183,10 @@ class CartViewSet(viewsets.ModelViewSet):
         
         cart = get_object_or_404(Cart, user=user)
         cart_product = get_object_or_404(CartProduct, product=product, cart=cart)
+        
+        # Update the stock of the product
+        product.stock += cart_product.quantity
+        product.save()
         
         cart_product.delete()
         cart.update_total_price()

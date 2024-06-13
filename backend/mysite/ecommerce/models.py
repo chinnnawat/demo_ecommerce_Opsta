@@ -115,7 +115,7 @@ class Order(models.Model):
     product = models.ManyToManyField(Product)
     customer = models.ForeignKey(User, on_delete=models.CASCADE)
     promotion = models.ForeignKey(Promotion, on_delete=models.CASCADE, null=True, blank=True)
-    quantity = models.IntegerField(default=1)
+    # quantity = models.IntegerField(default=1)
     phoneNumber = models.CharField(max_length=10, blank=True)
     address = models.CharField(max_length=100, default='', blank=True)
     date = models.DateField(default=timezone.now)
