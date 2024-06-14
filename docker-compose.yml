@@ -25,6 +25,8 @@ services:
       - ecommerce-network
     volumes:
       - ./frontend:/appFront
+    # environment:
+    #   - NEXT_PUBLIC_API_URL=http://backend:8000/api
 
   postgres:
     image: postgres:latest
@@ -42,7 +44,9 @@ services:
 
 networks:
   ecommerce-network:
-    driver: bridge
+    name: ecommerce-network
+    external: true
+    
 
 volumes:
   postgres-s-data:

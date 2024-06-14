@@ -36,7 +36,7 @@ export default function Cart() {
                 });
 
                 if(!userIdRespone.ok){
-                    throw new Error('Failed to fetch user id');
+                    throw new Error('กรุณาเลือกสินค้าครับ');
                 }
 
                 const userIdData = await userIdRespone.json();
@@ -76,7 +76,7 @@ export default function Cart() {
     
 
     if (error) {
-        return <div>Error: {error}</div>;
+        return <div>Error: {error.toString()}</div>;
     }
 
     if (!Array.isArray(cartDetails) || cartDetails.length === 0) {

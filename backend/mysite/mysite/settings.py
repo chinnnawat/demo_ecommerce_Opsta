@@ -167,6 +167,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
+    # middleware
+    'authentication.middleware.CheckUserMiddleware',
 ]
 
 ROOT_URLCONF = 'mysite.urls'

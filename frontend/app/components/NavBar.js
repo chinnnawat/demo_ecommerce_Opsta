@@ -120,7 +120,7 @@ export default function NavBar() {
                         </li>
                         <li>
                             <a 
-                                href="#" 
+                                href="/contract" 
                                 className={`block py-2 px-3 hover:bg-yellow-300 md:hover:bg-transparent md:hover:text-yellow-300 md:p-0 ${activeLink === 'contact' ? 'text-yellow-300' : ''}`} 
                                 onClick={() => handleLinkClick('contact')}
                             >
