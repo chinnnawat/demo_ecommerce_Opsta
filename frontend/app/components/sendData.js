@@ -18,7 +18,7 @@ export default function SendUserDataToLoginAPI(){
                         firstName: firstName,
                         lastName: lastName
                     };
-                    const response = await fetch ('http://localhost:8000/api/auth/login/', {
+                    const response = await fetch (`${process.env.NEXT_PUBLIC_API_TOKEN}login_user/`, {
                         method: "POST",
                         headers: {
                             'Content-Type': 'application/json',

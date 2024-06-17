@@ -15,7 +15,7 @@ export default function AccessToken() {
     if (session && session.accessToken) {
       const sendTokenToBackend = async () => {
         try {
-            const response = await fetch('http://localhost:8000/get_user_info/', {
+            const response = await fetch(`http://localhost:8000/get_user_info/`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

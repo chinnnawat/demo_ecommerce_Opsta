@@ -17,7 +17,7 @@ export default function ProductDetail({ params }) {
     useEffect(() => {
         const fetchProductDetail = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product/${productId}/getProduct_detail/`);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_PRODUCT_ALL}${productId}/getProduct_detail/`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch product detail');
                 }
@@ -65,7 +65,7 @@ export default function ProductDetail({ params }) {
         console.log('Sending cart data:', cartData);
 
         try {
-            const response = await fetch('http://localhost:8000/api/add_cart/add_to_cart/', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_ADD_TO_CART}add_to_cart/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -98,6 +98,7 @@ SOCIALACCOUNT_PROVIDERS = {
 AUTHENTICATION_BACKENDS = (
  'django.contrib.auth.backends.ModelBackend',
  'allauth.account.auth_backends.AuthenticationBackend',
+ 'authentication.backends.TokenAuthBackend'
 )
 
 SITE_ID = 1
@@ -157,6 +158,11 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_NAME = 'sessionid'
+SESSION_COOKIE_SECURE = False
+SESSION_SAVE_EVERY_REQUEST = True 
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -169,7 +175,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
     # middleware
-    'authentication.middleware.CheckUserMiddleware',
+    'authentication.middleware.GoogleOAuth2Middleware',
 ]
 
 ROOT_URLCONF = 'mysite.urls'

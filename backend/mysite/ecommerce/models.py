@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 import uuid
 from datetime import timedelta
@@ -73,6 +74,30 @@ class Promotion(models.Model):
     def enable_code(self):
         now = timezone.now()
         return self.start_date <= now <= self.end_date
+
+    def apply_best_promotion(sum_price):
+        best_promotion = None
+        best_total = sum_price
+        savings = Decimal(0)
+
+        promotions = Promotion.objects.all()
+        for promotion in promotions:
+            if promotion.enable_code():
+                if promotion.discount > 10 and sum_price >= 1000:
+                    total_with_discount = sum_price * (1 - Decimal(promotion.discount / 100))
+                    if total_with_discount < best_total:
+                        best_total = total_with_discount
+                        best_promotion = promotion
+
+                elif promotion.discount <= 10 and sum_price < 1000:
+                    total_with_discount = sum_price * (1 - Decimal(promotion.discount / 100))
+                    if total_with_discount < best_total:
+                        best_total = total_with_discount
+                        best_promotion = promotion
+
+                savings = sum_price - best_total
+
+        return best_promotion, best_total, savings
 
     def __str__(self):
         return self.name

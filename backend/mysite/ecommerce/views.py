@@ -61,6 +61,11 @@ class CartViewSet(viewsets.ModelViewSet):
 
     @action(methods=["post"], detail=False)
     def add_to_cart(self, request):
+        
+        user_data = request.active_user
+        
+        print(user_data.name)
+        
         user = request.data.get('user')  # รับข้อมูลผู้ใช้ที่ล็อกอินอยู่
         quantity = request.data.get('quantity')
         product_id = request.data.get('product')
@@ -78,11 +83,11 @@ class CartViewSet(viewsets.ModelViewSet):
             return Response({"error": "Not enough stock available"}, status=400)
 
         # get user id from db and compare it with the user from request
-        user_id = get_object_or_404(User, email=user)
+        user_id = get_object_or_404(User, email=user_data)
         print("User ID : ", user_id.id)
 
         # generate Cart
-        cart, created = Cart.objects.get_or_create(user=user_id)
+        cart, created = Cart.objects.get_or_create(user=user_data.id)
         print("Cart : ", cart)
 
         # Check if CartProduct already exists in the cart
@@ -171,6 +176,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
     @action(methods=["post"], detail=False)
     def remove(self, request):
+        user_data = request.active_user
         user_email = request.data.get('user')
         product_id = request.data.get('product')
 
@@ -192,7 +198,10 @@ class CartViewSet(viewsets.ModelViewSet):
 
     @action(methods=["POST"], detail=False)
     def checkout(self, request):
-        user_email = request.data.get('user')
+        
+        user_data = request.active_user
+        
+        user_email = user_data
 
         if not user_email:
             return Response({"error": "User email is required"}, status=status.HTTP_400_BAD_REQUEST)
@@ -204,35 +213,14 @@ class CartViewSet(viewsets.ModelViewSet):
         if not cart_products.exists():
             return Response({"error": "No products in cart"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Cal sum price
+        # Calculate sum price
         sum_price = cart_products.aggregate(
             total=Sum(F('product__price') * F('quantity')))['total'] or Decimal(0)
 
-        # Cal discount
-        promotions = Promotion.objects.all()
-        best_promotion = None
-        best_total = sum_price
-        savings = Decimal(0)
+        # Apply best promotion
+        best_promotion, best_total, savings = Promotion.apply_best_promotion(sum_price)
 
-        for promotion in promotions:
-            if promotion.enable_code():
-                if promotion.discount > 10 and sum_price >= 1000:
-                    total_with_discount = sum_price * \
-                        (1 - Decimal(promotion.discount / 100))
-                    if total_with_discount < best_total:
-                        best_total = total_with_discount
-                        best_promotion = promotion
-
-                elif promotion.discount <= 10 and sum_price < 1000:
-                    total_with_discount = sum_price * \
-                        (1 - Decimal(promotion.discount / 100))
-                    if total_with_discount < best_total:
-                        best_total = total_with_discount
-                        best_promotion = promotion
-
-                savings = sum_price - best_total
-
-        # สร้าง Order
+        # Create order
         order = Order.objects.create(
             customer=user,
             promotion=best_promotion,
@@ -245,10 +233,9 @@ class CartViewSet(viewsets.ModelViewSet):
             order.product.add(cart_product.product)
             cart_product.delete()
 
-        cart.update_total_price()  # อัปเดต totalPrice ของ cart
+        cart.update_total_price()
 
         return Response({"message": "Order placed successfully", "totalPrice": best_total}, status=status.HTTP_201_CREATED)
-
 
 class ShowCartViewSet(viewsets.ModelViewSet):
 
@@ -257,7 +244,12 @@ class ShowCartViewSet(viewsets.ModelViewSet):
 
     @action(methods=["POST"], detail=False)
     def show_detal_cart(self, request):
-        user_id = request.data.get('user_id')
+        
+        user_data = request.active_user
+        
+        user_id = user_data.id
+        
+        print(user_id)
 
         if not user_id:
             return Response({"error": "user_id is required"}, status=status.HTTP_400_BAD_REQUEST)

@@ -9,6 +9,7 @@ from .serializers import RegisterSerializer, GetInfoSerializer
 from django.contrib.auth import  login
 from .models import User
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import AnonymousUser
 
 
 class UserInfo(APIView):
@@ -44,43 +45,66 @@ class AuthViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     
-    
-    @action(methods=['post'], detail=False, url_path='login')   
+    @action(methods=['post'], detail=False)   
     def login_user(self, request):
-        user_data = request.data.get('userData')
         
-        if not user_data:
-            return Response({"error": "Invalid data"}, status=status.HTTP_400_BAD_REQUEST)
+        # ************************* New code *************************
+        print(f"Request User: {request.active_user}")
         
-        email = user_data.get('email')
-        first_name = user_data.get('firstName')
-        last_name = user_data.get('lastName')
+        user = request.active_user
+        email = user.email
+        first_name = user.name
+        last_name = user.lastname
+        print(f"User: {user}")
+        print(f"Email: {email}")
+        print(f"Lastname: {first_name}")
+        print(f"Last Name: {last_name}")
+        
+        return Response({
+            "user": RegisterSerializer(user).data,
+            "message": "User logged in successfully"
+        }, status=status.HTTP_200_OK)
+        
+        
+        
+        
+        # ************************* Old code *************************
+        
+        
+        # user_data = request.data.get('userData')
+        
+        # if not user_data:
+        #     return Response({"error": "Invalid data"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # email = user_data.get('email')
+        # first_name = user_data.get('firstName')
+        # last_name = user_data.get('lastName')
 
-        if not email:
-            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+        # if not email:
+        #     return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            user = User.objects.get(email=email)
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return Response({
-                "user": RegisterSerializer(user).data,
-                "message": "User logged in successfully"
-            }, status=status.HTTP_200_OK)
-        except User.DoesNotExist:
-            user_data = {
-                'email': email,
-                'name': first_name,
-                'lastname': last_name,
-                'password': email  # หรือรหัสผ่านอื่นที่ต้องการ
-            }
-            serializer = RegisterSerializer(data=user_data)
-            serializer.is_valid(raise_exception=True)
-            user = serializer.save()
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return Response({
-                "user": RegisterSerializer(user).data,
-                "message": "User registered successfully"
-            }, status=status.HTTP_201_CREATED)
+        # try:
+        #     user = User.objects.get(email=email)
+        #     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        #     return Response({
+        #         "user": RegisterSerializer(user).data,
+        #         "message": "User logged in successfully"
+        #     }, status=status.HTTP_200_OK)
+        # except User.DoesNotExist:
+        #     user_data = {
+        #         'email': email,
+        #         'name': first_name,
+        #         'lastname': last_name,
+        #         'password': email  # หรือรหัสผ่านอื่นที่ต้องการ
+        #     }
+        #     serializer = RegisterSerializer(data=user_data)
+        #     serializer.is_valid(raise_exception=True)
+        #     user = serializer.save()
+        #     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        #     return Response({
+        #         "user": RegisterSerializer(user).data,
+        #         "message": "User registered successfully"
+        #     }, status=status.HTTP_201_CREATED)
             
             
 # get user info

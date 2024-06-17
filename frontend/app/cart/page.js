@@ -27,7 +27,7 @@ export default function Cart() {
                 email: session?.user?.email  // User email
             };
             try{
-                const userIdRespone = await fetch('http://localhost:8000/api/user/get_user_info/', {
+                const userIdRespone = await fetch(`${process.env.NEXT_PUBLIC_API_USER_INFO}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -45,10 +45,11 @@ export default function Cart() {
                 // console.log(user_id);
 
 
-                const cartResponse = await fetch(`http://localhost:8000/api/show_cart/show_detal_cart/`, {
+                const cartResponse = await fetch(`${process.env.NEXT_PUBLIC_API_SHOW_CART}show_detal_cart/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.accessToken}`,
                     },
                     body: JSON.stringify({user_id} ), 
                 });
@@ -85,7 +86,7 @@ export default function Cart() {
 
     const handleQuantityChange = async (product_id, action) => {
         try{
-            const userIdRespone = await fetch('http://localhost:8000/api/user/get_user_info/', {
+            const userIdRespone = await fetch(`${process.env.NEXT_PUBLIC_API_USER_INFO}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -110,7 +111,7 @@ export default function Cart() {
                 apiEndpoint = 'checkout';
             }
             
-            const response = await fetch(`http://localhost:8000/api/add_cart/${apiEndpoint}/`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_ADD_TO_CART}${apiEndpoint}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

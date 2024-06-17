@@ -5,7 +5,7 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 
 // get all products
 export function useProducts() {
-  const { data, error, isLoading } = useSWR("http://localhost:8000/api/product/", fetcher);
+  const { data, error, isLoading } = useSWR(`${process.env.NEXT_PUBLIC_API_URL_PRODUCT_ALL}`, fetcher);
 
   return {
     products: data,
